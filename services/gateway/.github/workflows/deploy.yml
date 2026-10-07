@@ -40,6 +40,14 @@ jobs:
         working-directory: ./terraform
         env:
           TF_VAR_database_url: ${{ secrets.DATABASE_URL }}
+          TF_VAR_knowledge_service_url: ${{ secrets.KNOWLEDGE_SERVICE_URL }}
+          TF_VAR_orchestrator_url: ${{ secrets.ORCHESTRATOR_URL }}
+          TF_VAR_vigia_url: ${{ secrets.VIGIA_URL }}
+          TF_VAR_analyzer_url: ${{ secrets.ANALYZER_URL }}
+          TF_VAR_clustering_url: ${{ secrets.CLUSTERING_URL }}
+          TF_VAR_mcp_server_url: ${{ secrets.MCP_SERVER_URL }}
+          TF_VAR_strategist_url: ${{ secrets.STRATEGIST_URL }}
+          TF_VAR_embedding_model: ${{ secrets.EMBEDDING_MODEL }}
           TF_VAR_deepseek_api_key: ${{ secrets.DEEPSEEK_API_KEY }}
         run: terraform apply -target=aws_ecr_repository.repo -auto-approve
 
@@ -73,5 +81,13 @@ jobs:
         working-directory: ./terraform
         env:
           TF_VAR_database_url: ${{ secrets.DATABASE_URL }}
+          TF_VAR_knowledge_service_url: ${{ secrets.KNOWLEDGE_SERVICE_URL }}
+          TF_VAR_orchestrator_url: ${{ secrets.ORCHESTRATOR_URL }}
+          TF_VAR_vigia_url: ${{ secrets.VIGIA_URL }}
+          TF_VAR_analyzer_url: ${{ secrets.ANALYZER_URL }}
+          TF_VAR_clustering_url: ${{ secrets.CLUSTERING_URL }}
+          TF_VAR_mcp_server_url: ${{ secrets.MCP_SERVER_URL }}
+          TF_VAR_strategist_url: ${{ secrets.STRATEGIST_URL }}
+          TF_VAR_embedding_model: ${{ secrets.EMBEDDING_MODEL }}
           TF_VAR_deepseek_api_key: ${{ secrets.DEEPSEEK_API_KEY }}
         run: terraform apply -auto-approve
