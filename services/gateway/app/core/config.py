@@ -1,12 +1,11 @@
-from pydantic_settings import BaseSettings
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "API Gateway"
-    ORCHESTRATOR_URL: str = os.getenv("ORCHESTRATOR_URL", "http://localhost:8004/orchestrate")
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql://postgres@localhost:5432/postgres")
+    project_name: str = "API Gateway"
+    orchestrator_url: str = "http://orchestrator.centinela.internal:8004/orchestrate"
+    database_url: str = "postgresql://postgres@localhost:5432/postgres"
+    log_level: str = "INFO"
+
+    model_config = SettingsConfigDict(env_prefix="CENTINELA_", env_file=".env", extra="ignore")
 
 settings = Settings()

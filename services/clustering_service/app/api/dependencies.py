@@ -5,7 +5,7 @@ from app.services.clustering_service import ClusteringService
 
 detector = SklearnAnomalyDetector(scaler_path='scaler.pkl', model_path='isolation_forest.pkl')
 
-vector_repo = PgVectorRepository(dsn=settings.DATABASE_URL)
+vector_repo = PgVectorRepository(dsn=settings.database_url)
 
 clustering_service = ClusteringService(
     detector=detector,

@@ -1,14 +1,12 @@
-from pydantic_settings import BaseSettings
-import os
-from dotenv import load_dotenv
-
-load_dotenv(override=True)
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "Analyzer Agent"
-    
-    # URL del servidor MCP desplegado en AWS AppRunner
-    MCP_SERVER_URL: str = os.getenv("MCP_SERVER_URL", "https://jk3v3ufmrk.us-east-2.awsapprunner.com/sse")
-    DEEPSEEK_API_KEY: str = os.getenv("API_KEY", "")
+    project_name: str = "Analyzer Agent"
+    mcp_server_url: str = "http://postgres-mcp.centinela.internal:8006/sse"
+    knowledge_service_url: str = "http://knowledge.centinela.internal:8007/api/v1/knowledge/search"
+    deepseek_api_key: str = ""
+    log_level: str = "INFO"
+
+    model_config = SettingsConfigDict(env_prefix="CENTINELA_", env_file=".env", extra="ignore")
 
 settings = Settings()

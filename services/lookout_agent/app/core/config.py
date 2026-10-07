@@ -1,15 +1,11 @@
-from pydantic_settings import BaseSettings
-import os
-from dotenv import load_dotenv
-
-# Load the .env file from the current directory
-load_dotenv()
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "Lookout Agent (Vigía)"
-    CLUSTERING_URL: str = os.getenv("CLUSTERING_URL", "http://localhost:8001/analyze")
-    
-    # We map API_KEY from .env to DEEPSEEK_API_KEY for clarity
-    DEEPSEEK_API_KEY: str = os.getenv("API_KEY", "")
+    project_name: str = "Lookout Agent (Vigía)"
+    clustering_url: str = "http://clustering.centinela.internal:8001/analyze"
+    deepseek_api_key: str = ""
+    log_level: str = "INFO"
+
+    model_config = SettingsConfigDict(env_prefix="CENTINELA_", env_file=".env", extra="ignore")
 
 settings = Settings()

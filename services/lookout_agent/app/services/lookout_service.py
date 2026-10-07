@@ -15,10 +15,10 @@ class LookoutService:
         self.clustering_client = clustering_client
         
         # Inicializar el LLM (DeepSeek) solo si hay API Key disponible
-        if settings.DEEPSEEK_API_KEY:
+        if settings.deepseek_api_key:
             self.llm = ChatOpenAI(
                 model="deepseek-chat",
-                api_key=settings.DEEPSEEK_API_KEY,
+                api_key=settings.deepseek_api_key,
                 base_url="https://api.deepseek.com",
                 temperature=0.2
             )

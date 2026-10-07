@@ -8,7 +8,7 @@ from app.infrastructure.mcp_client import MCPClientWrapper
 logging.basicConfig(level=logging.INFO)
 
 # Instancia global del cliente MCP
-mcp_client = MCPClientWrapper(url=settings.MCP_SERVER_URL)
+mcp_client = MCPClientWrapper(url=settings.mcp_server_url)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -21,7 +21,7 @@ async def lifespan(app: FastAPI):
     # Shutdown
     await mcp_client.disconnect()
 
-app = FastAPI(title=settings.PROJECT_NAME, lifespan=lifespan)
+app = FastAPI(title=settings.project_name, lifespan=lifespan)
 
 # Para poder inyectarlo en dependencias
 app.state.mcp_client = mcp_client

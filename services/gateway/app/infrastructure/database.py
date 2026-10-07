@@ -10,7 +10,7 @@ class Database:
 
     async def connect(self):
         logger.info("Connecting to database...")
-        self.pool = await asyncpg.create_pool(settings.DATABASE_URL)
+        self.pool = await asyncpg.create_pool(settings.database_url)
         await self._init_db()
 
     async def disconnect(self):

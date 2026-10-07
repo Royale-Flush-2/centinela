@@ -15,7 +15,7 @@ async def lifespan(app: FastAPI):
     yield
     await db.disconnect()
 
-app = FastAPI(title=settings.PROJECT_NAME, lifespan=lifespan)
+app = FastAPI(title=settings.project_name, lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

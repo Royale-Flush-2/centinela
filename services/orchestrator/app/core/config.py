@@ -1,10 +1,12 @@
-from pydantic_settings import BaseSettings
-import os
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "Orchestrator Service"
-    VIGIA_URL: str = os.getenv("VIGIA_URL", "http://localhost:8002/process_anomaly")
-    ANALYZER_URL: str = os.getenv("ANALYZER_URL", "http://localhost:8003/analyze_metadata")
-    STRATEGIST_URL: str = os.getenv("STRATEGIST_URL", "http://localhost:8005/api/v1/strategist/analyze")
+    project_name: str = "Orchestrator Service"
+    vigia_url: str = "http://lookout.centinela.internal:8002/process_anomaly"
+    analyzer_url: str = "http://analyzer.centinela.internal:8003/analyze_metadata"
+    strategist_url: str = "http://strategist.centinela.internal:8005/api/v1/strategist/analyze"
+    log_level: str = "INFO"
+
+    model_config = SettingsConfigDict(env_prefix="CENTINELA_", env_file=".env", extra="ignore")
 
 settings = Settings()

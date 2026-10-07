@@ -5,7 +5,7 @@ from app.core.config import settings
 
 logging.basicConfig(level=logging.INFO)
 
-app = FastAPI(title=settings.PROJECT_NAME)
+app = FastAPI(title=settings.project_name)
 
 app.include_router(orchestration_controller.router)
 

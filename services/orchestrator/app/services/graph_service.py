@@ -12,7 +12,7 @@ async def call_vigia(state: GraphState) -> GraphState:
     
     async with httpx.AsyncClient(timeout=60.0) as client:
         try:
-            response = await client.post(settings.VIGIA_URL, json=payload)
+            response = await client.post(settings.vigia_url, json=payload)
             response.raise_for_status()
             result = response.json()
             
@@ -43,7 +43,7 @@ async def call_analyzer(state: GraphState) -> GraphState:
     
     async with httpx.AsyncClient(timeout=120.0) as client:
         try:
-            response = await client.post(settings.ANALYZER_URL, json=payload)
+            response = await client.post(settings.analyzer_url, json=payload)
             response.raise_for_status()
             result = response.json()
             
@@ -80,7 +80,7 @@ async def call_strategist(state: GraphState) -> GraphState:
     
     async with httpx.AsyncClient(timeout=60.0) as client:
         try:
-            response = await client.post(settings.STRATEGIST_URL, json=payload)
+            response = await client.post(settings.strategist_url, json=payload)
             response.raise_for_status()
             result = response.json()
             
