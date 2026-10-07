@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+httpx
+pydantic-settings
+scikit-learn
+numpy
+psycopg2-binary
+pgvector
+pandas

@@ -1,0 +1,59 @@
+name: Deploy chat_model
+
+on:
+  push:
+    branches:
+      - master
+      - main
+
+env:
+  AWS_REGION: "us-east-2"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        working-directory: ./terraform
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=chat_model/terraform.tfstate" \
+            -backend-config="region=${{ env.AWS_REGION }}"
+
+      - name: Terraform Apply (ECR)
+        working-directory: ./terraform
+        env:
+          TF_VAR_database_url: ${{ secrets.DATABASE_URL }}
+          TF_VAR_deepseek_api_key: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: terraform apply -target=aws_ecr_repository.repo -auto-approve
+
+      - name: Build and Push Docker Image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker build -t $ECR_REGISTRY/centinela-chat-model:latest .
+          docker push $ECR_REGISTRY/centinela-chat-model:latest
+
+      - name: Terraform Apply (AppRunner)
+        working-directory: ./terraform
+        env:
+          TF_VAR_database_url: ${{ secrets.DATABASE_URL }}
+          TF_VAR_deepseek_api_key: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: terraform apply -auto-approve

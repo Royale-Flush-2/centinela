@@ -1,0 +1,861 @@
+{
+  "version": "2.0",
+  "document": "alert_detail",
+  "description": "Schema of the Markdown the Strategist agent delivers for an alert detail. '# <component>' opens a component; the text right below the '#' goes to its default slot; '## <slot>:' opens a slot (the value can be on the same line after ':' or on the following lines). Names are matched without case, accents or spaces ('detected at' = 'detected_at'). The Spanish names of the original format are accepted as aliases.",
+  "types": {
+    "text": "One line of text.",
+    "paragraph": "One or more paragraphs of text.",
+    "enum": "One of the 'options' (or their aliases). Case and accents are ignored.",
+    "money": "Colombian pesos: '$579,2 M' / '$579.2M', '$842.000' / '$842,000', '$0' or text without a figure ('No direct cost' = 0). Returns { value, text }.",
+    "number": "Number in the format of the content: '1.860' and '4,2' in Spanish, '1,860' and '4.2' in English.",
+    "boolean": "yes / no (also sí / no).",
+    "date": "'2 oct 2026, 6:12 a. m.' or 'Oct 2, 2026, 6:12 AM'. Returns { text, iso }.",
+    "list": "'- item' bullets.",
+    "key_value": "'- key: value' bullets. Returns an object.",
+    "table": "Markdown table. Returns { columns, rows[] } with rows as objects. 'column_aliases' renames columns, 'numeric_columns' turns cells into numbers and 'money_columns' into { value, text }.",
+    "code": "``` block with a language. Returns { language, code }."
+  },
+  "zones": [
+    {
+      "id": "header",
+      "title": null
+    },
+    {
+      "id": "what_happened",
+      "title": "What happened"
+    },
+    {
+      "id": "why",
+      "title": "Why"
+    },
+    {
+      "id": "proposal",
+      "title": "What I propose"
+    },
+    {
+      "id": "decision",
+      "title": null
+    },
+    {
+      "id": "how_i_got_here",
+      "title": "See how I got here",
+      "collapsible": true
+    },
+    {
+      "id": "log",
+      "title": "Activity log"
+    },
+    {
+      "id": "chat",
+      "title": "Ask about this alert"
+    }
+  ],
+  "components": {
+    "hero": {
+      "render": "AlertHero",
+      "zone": "header",
+      "order": 1,
+      "required": true,
+      "repeatable": false,
+      "default_slot": "summary",
+      "slots": {
+        "summary": {
+          "type": "paragraph",
+          "required": true,
+          "field": "summary",
+          "alias": [
+            "resumen"
+          ],
+          "description": "What happened, in 1–2 business sentences. Shown as the 'What happened' paragraph."
+        },
+        "id": {
+          "type": "text",
+          "required": true,
+          "field": "id"
+        },
+        "title": {
+          "type": "text",
+          "required": true,
+          "field": "headline",
+          "max": 140,
+          "alias": [
+            "titulo",
+            "titular",
+            "headline"
+          ]
+        },
+        "severity": {
+          "type": "enum",
+          "required": true,
+          "field": "severity",
+          "alias": [
+            "severidad",
+            "prioridad",
+            "priority"
+          ],
+          "options": {
+            "critical": {
+              "label": "Critical",
+              "icon": "octagon",
+              "color": "cr",
+              "alias": [
+                "critica"
+              ]
+            },
+            "high": {
+              "label": "High",
+              "icon": "triangle",
+              "color": "al",
+              "alias": [
+                "alta"
+              ]
+            },
+            "medium": {
+              "label": "Medium",
+              "icon": "circle",
+              "color": "me",
+              "alias": [
+                "media"
+              ]
+            },
+            "low": {
+              "label": "Low",
+              "icon": "dot",
+              "color": "ba",
+              "alias": [
+                "baja"
+              ]
+            }
+          }
+        },
+        "type": {
+          "type": "enum",
+          "required": true,
+          "field": "type",
+          "alias": [
+            "tipo",
+            "tema",
+            "topic"
+          ],
+          "options": {
+            "stockout": {
+              "label": "Stockout",
+              "alias": [
+                "quiebre de inventario",
+                "quiebre_inventario",
+                "quiebre"
+              ]
+            },
+            "overstock": {
+              "label": "Overstock",
+              "alias": [
+                "sobrestock",
+                "exceso de inventario",
+                "excess inventory"
+              ]
+            },
+            "overdue_receivables": {
+              "label": "Overdue receivables",
+              "alias": [
+                "cartera vencida",
+                "cartera_vencida",
+                "cartera",
+                "receivables"
+              ]
+            },
+            "default_risk": {
+              "label": "Default risk",
+              "alias": [
+                "riesgo de impago",
+                "riesgo_impago",
+                "impago"
+              ]
+            },
+            "low_margin": {
+              "label": "Margin below policy",
+              "alias": [
+                "margen bajo politica",
+                "margen_bajo",
+                "margin below policy",
+                "margen",
+                "margin"
+              ]
+            },
+            "returns": {
+              "label": "Returns",
+              "alias": [
+                "devoluciones"
+              ]
+            },
+            "sales_drop": {
+              "label": "Sales drop",
+              "alias": [
+                "caida de ventas",
+                "caida_ventas",
+                "ventas",
+                "sales"
+              ]
+            }
+          }
+        },
+        "status": {
+          "type": "enum",
+          "required": true,
+          "field": "status",
+          "alias": [
+            "estado"
+          ],
+          "options": {
+            "new": {
+              "label": "New",
+              "alias": [
+                "nueva"
+              ]
+            },
+            "analyzing": {
+              "label": "Analyzing",
+              "alias": [
+                "en analisis",
+                "en_analisis"
+              ]
+            },
+            "proposal": {
+              "label": "Proposal ready",
+              "alias": [
+                "propuesta",
+                "propuesta lista"
+              ]
+            },
+            "approved": {
+              "label": "Approved",
+              "alias": [
+                "aprobada"
+              ]
+            },
+            "rejected": {
+              "label": "Rejected",
+              "alias": [
+                "rechazada"
+              ]
+            },
+            "executed": {
+              "label": "Executed",
+              "alias": [
+                "ejecutada"
+              ]
+            }
+          }
+        },
+        "confidence": {
+          "type": "enum",
+          "required": true,
+          "field": "confidence",
+          "alias": [
+            "confianza"
+          ],
+          "options": {
+            "high": {
+              "label": "High confidence",
+              "bars": 3,
+              "alias": [
+                "alta"
+              ]
+            },
+            "medium": {
+              "label": "Medium confidence",
+              "bars": 2,
+              "alias": [
+                "media"
+              ]
+            },
+            "low": {
+              "label": "Low confidence",
+              "bars": 1,
+              "alias": [
+                "baja"
+              ]
+            }
+          },
+          "numeric_thresholds": {
+            "high": 0.7,
+            "medium": 0.4,
+            "low": 0
+          }
+        },
+        "amount_at_risk": {
+          "type": "money",
+          "required": true,
+          "field": "amount_at_risk",
+          "alias": [
+            "pesos_en_riesgo"
+          ],
+          "description": "COP per month."
+        },
+        "risk_note": {
+          "type": "text",
+          "required": false,
+          "field": "amount_at_risk_note",
+          "alias": [
+            "nota_del_riesgo"
+          ]
+        },
+        "entity": {
+          "type": "key_value",
+          "required": true,
+          "field": "entity",
+          "alias": [
+            "entidad"
+          ]
+        },
+        "detected_at": {
+          "type": "date",
+          "required": true,
+          "field": "detected_at",
+          "alias": [
+            "fecha_deteccion"
+          ]
+        },
+        "updated_at": {
+          "type": "date",
+          "required": false,
+          "field": "updated_at",
+          "alias": [
+            "fecha_actualizacion"
+          ]
+        },
+        "agents": {
+          "type": "key_value",
+          "required": false,
+          "field": "agents",
+          "alias": [
+            "agentes"
+          ],
+          "description": "Step of each agent: watcher, analyst, strategist (or vigia, analista, estratega)."
+        }
+      }
+    },
+    "kpi": {
+      "render": "KpiCard",
+      "zone": "what_happened",
+      "order": 2,
+      "required": true,
+      "repeatable": true,
+      "min": 1,
+      "max": 6,
+      "collection": "metrics",
+      "default_slot": "label",
+      "slots": {
+        "label": {
+          "type": "text",
+          "required": true,
+          "alias": [
+            "etiqueta"
+          ]
+        },
+        "value": {
+          "type": "number",
+          "required": true,
+          "alias": [
+            "valor"
+          ]
+        },
+        "unit": {
+          "type": "text",
+          "required": false,
+          "alias": [
+            "unidad"
+          ]
+        },
+        "note": {
+          "type": "text",
+          "required": false,
+          "alias": [
+            "nota"
+          ]
+        },
+        "tone": {
+          "type": "enum",
+          "required": false,
+          "alias": [
+            "tono"
+          ],
+          "options": {
+            "neutral": {
+              "alias": [
+                "neutro"
+              ]
+            },
+            "critical": {
+              "color": "cr",
+              "alias": [
+                "critico"
+              ]
+            },
+            "positive": {
+              "color": "ok",
+              "alias": [
+                "positivo"
+              ]
+            }
+          },
+          "default": "neutral"
+        }
+      },
+      "bullet_list": "kpis"
+    },
+    "chart": {
+      "render": "LineChart",
+      "zone": "why",
+      "order": 3,
+      "required": false,
+      "repeatable": false,
+      "alias": [
+        "grafico"
+      ],
+      "default_slot": "title",
+      "slots": {
+        "title": {
+          "type": "text",
+          "required": true,
+          "alias": [
+            "titulo"
+          ]
+        },
+        "unit": {
+          "type": "text",
+          "required": true,
+          "alias": [
+            "unidad"
+          ]
+        },
+        "threshold": {
+          "type": "number",
+          "required": false,
+          "alias": [
+            "umbral"
+          ]
+        },
+        "threshold_label": {
+          "type": "text",
+          "required": false,
+          "alias": [
+            "etiqueta_umbral"
+          ]
+        },
+        "today": {
+          "type": "text",
+          "required": false,
+          "alias": [
+            "hoy"
+          ],
+          "description": "Value of the 'date' column where the today line is drawn."
+        },
+        "series": {
+          "type": "key_value",
+          "required": true,
+          "description": "column: legend name. The order sets the style: 1 = actual, 2 = no action (red dashed), 3 = with the proposal (green)."
+        },
+        "data": {
+          "type": "table",
+          "required": true,
+          "alias": [
+            "datos"
+          ],
+          "numeric_columns": [
+            "*"
+          ],
+          "x_axis": "date",
+          "column_aliases": {
+            "fecha": "date"
+          }
+        },
+        "annotations": {
+          "type": "list",
+          "required": false,
+          "alias": [
+            "anotaciones"
+          ],
+          "description": "'<date>: text' marks a point; '<date> – <date>: text' shades a range."
+        }
+      },
+      "bullet_list": "kpis"
+    },
+    "rule": {
+      "render": "PolicyRule",
+      "zone": "why",
+      "order": 4,
+      "required": false,
+      "repeatable": false,
+      "alias": [
+        "regla"
+      ],
+      "default_slot": "text",
+      "slots": {
+        "text": {
+          "type": "paragraph",
+          "required": true,
+          "field": "threshold.text",
+          "alias": [
+            "texto"
+          ]
+        },
+        "code": {
+          "type": "text",
+          "required": true,
+          "field": "threshold.code",
+          "alias": [
+            "codigo"
+          ]
+        },
+        "situation": {
+          "type": "text",
+          "required": false,
+          "field": "threshold.situation",
+          "alias": [
+            "situacion"
+          ]
+        }
+      }
+    },
+    "cause": {
+      "render": "RelatedCause",
+      "zone": "why",
+      "order": 5,
+      "required": false,
+      "repeatable": true,
+      "max": 3,
+      "alias": [
+        "causa"
+      ],
+      "collection": "related",
+      "default_slot": "details",
+      "slots": {
+        "details": {
+          "type": "text",
+          "required": false,
+          "alias": [
+            "detalle"
+          ]
+        },
+        "type": {
+          "type": "text",
+          "required": true,
+          "alias": [
+            "tipo"
+          ]
+        },
+        "title": {
+          "type": "text",
+          "required": true,
+          "alias": [
+            "titulo",
+            "entidad",
+            "entity"
+          ]
+        },
+        "metric": {
+          "type": "text",
+          "required": true,
+          "alias": [
+            "metrica",
+            "metricas",
+            "metrics"
+          ]
+        }
+      }
+    },
+    "action": {
+      "render": "ProposedAction",
+      "zone": "proposal",
+      "order": 6,
+      "required": true,
+      "repeatable": true,
+      "min": 1,
+      "max": 4,
+      "alias": [
+        "accion"
+      ],
+      "collection": "actions",
+      "default_slot": "details",
+      "slots": {
+        "details": {
+          "type": "paragraph",
+          "required": false,
+          "alias": [
+            "detalle"
+          ]
+        },
+        "id": {
+          "type": "text",
+          "required": true
+        },
+        "title": {
+          "type": "text",
+          "required": true,
+          "alias": [
+            "titulo"
+          ]
+        },
+        "protects": {
+          "type": "money",
+          "required": true,
+          "alias": [
+            "protege"
+          ],
+          "description": "Pesos per month this action protects on its own."
+        },
+        "cost": {
+          "type": "money",
+          "required": true,
+          "alias": [
+            "costo"
+          ]
+        },
+        "cost_concept": {
+          "type": "text",
+          "required": false,
+          "alias": [
+            "concepto_costo"
+          ]
+        },
+        "confidence": {
+          "type": "enum",
+          "required": true,
+          "alias": [
+            "confianza"
+          ],
+          "options": {
+            "high": {
+              "bars": 3,
+              "alias": [
+                "alta"
+              ]
+            },
+            "medium": {
+              "bars": 2,
+              "alias": [
+                "media"
+              ]
+            },
+            "low": {
+              "bars": 1,
+              "alias": [
+                "baja"
+              ]
+            }
+          },
+          "numeric_thresholds": {
+            "high": 0.7,
+            "medium": 0.4,
+            "low": 0
+          }
+        },
+        "quantity": {
+          "type": "number",
+          "required": false,
+          "alias": [
+            "cantidad"
+          ],
+          "description": "Value editable with the Edit button."
+        },
+        "quantity_label": {
+          "type": "text",
+          "required": false,
+          "alias": [
+            "etiqueta_cantidad"
+          ]
+        },
+        "selected": {
+          "type": "boolean",
+          "required": false,
+          "alias": [
+            "seleccionada"
+          ],
+          "default": true
+        },
+        "assumptions": {
+          "type": "list",
+          "required": true,
+          "alias": [
+            "supuestos"
+          ]
+        }
+      }
+    },
+    "doubt": {
+      "render": "DoubtNotice",
+      "zone": "proposal",
+      "order": 7,
+      "required": false,
+      "repeatable": false,
+      "alias": [
+        "duda"
+      ],
+      "default_slot": "text",
+      "slots": {
+        "text": {
+          "type": "paragraph",
+          "required": true,
+          "field": "doubt",
+          "alias": [
+            "texto"
+          ],
+          "description": "Where the system has doubts and what happens if the assumption fails."
+        }
+      }
+    },
+    "decision": {
+      "render": "DecisionBar",
+      "zone": "decision",
+      "order": 8,
+      "required": true,
+      "repeatable": false,
+      "slots": {
+        "combinations": {
+          "type": "table",
+          "required": true,
+          "alias": [
+            "combinaciones"
+          ],
+          "column_aliases": {
+            "acciones": "actions",
+            "protege": "protects"
+          },
+          "money_columns": [
+            "protects"
+          ],
+          "description": "Real protection of each combination of actions (not always the sum). Ids joined with '+'."
+        },
+        "rejection_reasons": {
+          "type": "list",
+          "required": true,
+          "alias": [
+            "motivos_rechazo"
+          ],
+          "description": "The last one is treated as 'Other reason' and requires text."
+        }
+      }
+    },
+    "evidence": {
+      "render": "Evidence",
+      "zone": "how_i_got_here",
+      "order": 9,
+      "required": true,
+      "repeatable": true,
+      "min": 1,
+      "alias": [
+        "evidencia"
+      ],
+      "collection": "evidence",
+      "default_slot": "description",
+      "slots": {
+        "description": {
+          "type": "paragraph",
+          "required": false,
+          "alias": [
+            "descripcion"
+          ]
+        },
+        "title": {
+          "type": "text",
+          "required": true,
+          "alias": [
+            "titulo"
+          ]
+        },
+        "highlight": {
+          "type": "text",
+          "required": false,
+          "alias": [
+            "destacar"
+          ],
+          "description": "Text of the first cell of the row to highlight."
+        },
+        "table": {
+          "type": "table",
+          "required": true,
+          "alias": [
+            "tabla"
+          ]
+        },
+        "sql": {
+          "type": "code",
+          "required": false
+        }
+      },
+      "bullet_list": "table"
+    },
+    "calculation": {
+      "render": "CalculationNote",
+      "zone": "how_i_got_here",
+      "order": 10,
+      "required": false,
+      "repeatable": false,
+      "alias": [
+        "calculo"
+      ],
+      "default_slot": "formula",
+      "slots": {
+        "formula": {
+          "type": "paragraph",
+          "required": true
+        },
+        "rule_version": {
+          "type": "text",
+          "required": false,
+          "alias": [
+            "version_regla"
+          ]
+        }
+      }
+    },
+    "log": {
+      "render": "Timeline",
+      "zone": "log",
+      "order": 11,
+      "required": false,
+      "repeatable": false,
+      "alias": [
+        "bitacora"
+      ],
+      "slots": {
+        "events": {
+          "type": "table",
+          "required": true,
+          "field": "history",
+          "alias": [
+            "eventos"
+          ],
+          "column_aliases": {
+            "fecha": "date",
+            "quien": "who",
+            "evento": "event",
+            "estado": "status"
+          },
+          "required_columns": [
+            "date",
+            "who",
+            "event"
+          ]
+        }
+      }
+    },
+    "chat": {
+      "render": "AlertChat",
+      "zone": "chat",
+      "order": 12,
+      "required": false,
+      "repeatable": false,
+      "slots": {
+        "suggested_questions": {
+          "type": "list",
+          "required": false,
+          "max": 4,
+          "alias": [
+            "preguntas_sugeridas"
+          ]
+        }
+      }
+    }
+  }
+}

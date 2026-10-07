@@ -1,0 +1,22 @@
+[project]
+name = "chat-model"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "asyncpg>=0.31.0",
+    "fastapi>=0.142.2",
+    "httpx>=0.28.1",
+    "langchain>=1.4.3",
+    "langchain-mcp-adapters>=0.3.2",
+    "langchain-openai>=1.6.7",
+    "mcp>=1.30.0",
+    "pydantic>=2.13.5",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "uvicorn>=0.54.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = [".", "src"]

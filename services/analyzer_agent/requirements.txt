@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+httpx
+pydantic-settings
+langchain-openai
+langchain-core
+langchain
+langgraph
+mcp
+httpx-sse

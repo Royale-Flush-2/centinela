@@ -1,0 +1,77 @@
+name: Deploy gateway
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  AWS_REGION: "us-east-2"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        working-directory: ./terraform
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=gateway/terraform.tfstate" \
+            -backend-config="region=${{ env.AWS_REGION }}"
+
+      - name: Terraform Apply (ECR)
+        working-directory: ./terraform
+        env:
+          TF_VAR_database_url: ${{ secrets.DATABASE_URL }}
+          TF_VAR_deepseek_api_key: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: terraform apply -target=aws_ecr_repository.repo -auto-approve
+
+      - name: Build and Push Docker Image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker build -t $ECR_REGISTRY/centinela-gateway:latest .
+          docker push $ECR_REGISTRY/centinela-gateway:latest
+
+      - name: Wait for AppRunner to be READY
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: us-east-2
+        run: |
+          echo "Waiting 15 seconds to let App Runner catch up with ECR push..."
+          sleep 15
+          echo "Waiting for any ongoing AppRunner deployments to finish..."
+          while true; do
+            STATUS=$(aws apprunner list-services --region us-east-2 --query "ServiceSummaryList[?ServiceName=='centinela-gateway'].Status" --output text || echo "UNKNOWN")
+            if [ "$STATUS" = "RUNNING" ] || [ "$STATUS" = "CREATE_FAILED" ] || [ "$STATUS" = "UNKNOWN" ] || [ -z "$STATUS" ]; then
+              echo "AppRunner is ready (Status: $STATUS)"
+              break
+            fi
+            echo "AppRunner status is $STATUS. Waiting 20 seconds..."
+            sleep 20
+          done
+
+      - name: Terraform Apply (AppRunner)
+        working-directory: ./terraform
+        env:
+          TF_VAR_database_url: ${{ secrets.DATABASE_URL }}
+          TF_VAR_deepseek_api_key: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: terraform apply -auto-approve
