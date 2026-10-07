@@ -10,6 +10,9 @@ on:
 
 jobs:
   deploy:
+    permissions:
+      id-token: write
+      contents: read
     uses: ./.github/workflows/_deploy_service.yml
     with:
       service_name: 'knowledge-service'
