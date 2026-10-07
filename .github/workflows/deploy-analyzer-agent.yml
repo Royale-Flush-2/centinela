@@ -1,0 +1,17 @@
+name: Deploy Analyzer Agent
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'services/analyzer_agent/**'
+      - '.github/workflows/deploy-analyzer-agent.yml'
+      - '.github/workflows/_deploy_service.yml'
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/_deploy_service.yml
+    with:
+      service_name: 'analyzer-agent'
+      service_path: 'services/analyzer_agent'
+    secrets: inherit

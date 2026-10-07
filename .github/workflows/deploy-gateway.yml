@@ -1,0 +1,17 @@
+name: Deploy Gateway
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'services/gateway/**'
+      - '.github/workflows/deploy-gateway.yml'
+      - '.github/workflows/_deploy_service.yml'
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/_deploy_service.yml
+    with:
+      service_name: 'gateway'
+      service_path: 'services/gateway'
+    secrets: inherit

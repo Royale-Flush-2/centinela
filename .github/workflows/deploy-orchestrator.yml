@@ -1,0 +1,17 @@
+name: Deploy Orchestrator
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'services/orchestrator/**'
+      - '.github/workflows/deploy-orchestrator.yml'
+      - '.github/workflows/_deploy_service.yml'
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/_deploy_service.yml
+    with:
+      service_name: 'orchestrator'
+      service_path: 'services/orchestrator'
+    secrets: inherit

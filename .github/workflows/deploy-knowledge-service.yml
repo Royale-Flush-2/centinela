@@ -1,0 +1,17 @@
+name: Deploy Knowledge Service
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'services/knowledge-service/**'
+      - '.github/workflows/deploy-knowledge-service.yml'
+      - '.github/workflows/_deploy_service.yml'
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/_deploy_service.yml
+    with:
+      service_name: 'knowledge-service'
+      service_path: 'services/knowledge-service'
+    secrets: inherit

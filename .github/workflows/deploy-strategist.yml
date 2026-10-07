@@ -1,0 +1,17 @@
+name: Deploy Strategist
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'services/strategist/**'
+      - '.github/workflows/deploy-strategist.yml'
+      - '.github/workflows/_deploy_service.yml'
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/_deploy_service.yml
+    with:
+      service_name: 'strategist'
+      service_path: 'services/strategist'
+    secrets: inherit

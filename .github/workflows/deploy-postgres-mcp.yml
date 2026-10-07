@@ -1,0 +1,17 @@
+name: Deploy Postgres Mcp
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'services/postgres-mcp/**'
+      - '.github/workflows/deploy-postgres-mcp.yml'
+      - '.github/workflows/_deploy_service.yml'
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/_deploy_service.yml
+    with:
+      service_name: 'postgres-mcp'
+      service_path: 'services/postgres-mcp'
+    secrets: inherit

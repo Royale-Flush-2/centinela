@@ -1,0 +1,17 @@
+name: Deploy Chat Model
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'services/chat_model/**'
+      - '.github/workflows/deploy-chat-model.yml'
+      - '.github/workflows/_deploy_service.yml'
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/_deploy_service.yml
+    with:
+      service_name: 'chat-model'
+      service_path: 'services/chat_model'
+    secrets: inherit

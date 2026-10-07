@@ -1,0 +1,17 @@
+name: Deploy Clustering Service
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'services/clustering_service/**'
+      - '.github/workflows/deploy-clustering-service.yml'
+      - '.github/workflows/_deploy_service.yml'
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/_deploy_service.yml
+    with:
+      service_name: 'clustering-service'
+      service_path: 'services/clustering_service'
+    secrets: inherit
