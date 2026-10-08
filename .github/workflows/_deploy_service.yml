@@ -65,10 +65,27 @@ jobs:
           docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
+      - name: Wait for AppRunner Ready
+        run: |
+          SERVICE_ARN=$(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='${{ inputs.ecr_repo_name }}'].ServiceArn" --output text || echo "None")
+          if [ "$SERVICE_ARN" != "None" ] && [ -n "$SERVICE_ARN" ]; then
+            echo "Waiting for AppRunner service $SERVICE_ARN to be ready..."
+            while true; do
+              STATUS=$(aws apprunner describe-service --service-arn $SERVICE_ARN --query "Service.Status" --output text)
+              if [ "$STATUS" == "RUNNING" ] || [ "$STATUS" == "CREATE_FAILED" ] || [ "$STATUS" == "UPDATE_FAILED" ] || [ -z "$STATUS" ]; then
+                echo "Service is $STATUS"
+                break
+              fi
+              echo "Service is $STATUS, waiting 15 seconds..."
+              sleep 15
+            done
+          fi
+
       - name: Terraform Apply (AppRunner and other resources)
         working-directory: ${{ inputs.service_path }}/terraform
         env:
-          TF_VAR_deepseek_api_key: ${{ secrets.DEEPSEEK_API_KEY }}
+          TF_VAR_deepseek_api_key: ${{ secrets.CENTINELA_DEEPSEEK_API_KEY }}
+          TF_VAR_database_url: ${{ secrets.CENTINELA_DATABASE_URL }}
           TF_VAR_knowledge_service_url: ${{ secrets.KNOWLEDGE_SERVICE_URL }}
           TF_VAR_orchestrator_url: ${{ secrets.ORCHESTRATOR_URL }}
           TF_VAR_vigia_url: ${{ secrets.VIGIA_URL }}
