@@ -17,4 +17,6 @@ jobs:
     with:
       service_name: 'analyzer-agent'
       service_path: 'services/analyzer_agent'
+      ecr_repo_name: 'centinela-analyzer-agent'
+      ecr_resource_name: 'repo'
     secrets: inherit

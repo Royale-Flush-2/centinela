@@ -17,4 +17,6 @@ jobs:
     with:
       service_name: 'orchestrator'
       service_path: 'services/orchestrator'
+      ecr_repo_name: 'centinela-orchestrator'
+      ecr_resource_name: 'repo'
     secrets: inherit

@@ -17,4 +17,6 @@ jobs:
     with:
       service_name: 'strategist'
       service_path: 'services/strategist'
+      ecr_repo_name: 'strategist-api'
+      ecr_resource_name: 'app_repo'
     secrets: inherit

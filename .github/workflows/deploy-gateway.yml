@@ -17,4 +17,6 @@ jobs:
     with:
       service_name: 'gateway'
       service_path: 'services/gateway'
+      ecr_repo_name: 'centinela-gateway'
+      ecr_resource_name: 'repo'
     secrets: inherit

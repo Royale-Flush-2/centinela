@@ -17,4 +17,6 @@ jobs:
     with:
       service_name: 'clustering-service'
       service_path: 'services/clustering_service'
+      ecr_repo_name: 'centinela-clustering-service'
+      ecr_resource_name: 'repo'
     secrets: inherit

@@ -17,4 +17,6 @@ jobs:
     with:
       service_name: 'lookout-agent'
       service_path: 'services/lookout_agent'
+      ecr_repo_name: 'centinela-lookout-agent'
+      ecr_resource_name: 'repo'
     secrets: inherit

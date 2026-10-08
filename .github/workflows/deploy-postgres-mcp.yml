@@ -17,4 +17,6 @@ jobs:
     with:
       service_name: 'postgres-mcp'
       service_path: 'services/postgres-mcp'
+      ecr_repo_name: 'postgres-mcp'
+      ecr_resource_name: 'app_repo'
     secrets: inherit

@@ -6,11 +6,19 @@ on:
       service_name:
         required: true
         type: string
-        description: 'Name of the service (matches ECR repo name)'
+        description: 'Name of the service (matches state key)'
       service_path:
         required: true
         type: string
         description: 'Path to the service directory'
+      ecr_repo_name:
+        required: true
+        type: string
+        description: 'Name of the ECR repository'
+      ecr_resource_name:
+        required: true
+        type: string
+        description: 'Terraform resource name for ECR repository (e.g., repo or app_repo)'
 
 jobs:
   build-and-deploy:
@@ -41,7 +49,7 @@ jobs:
 
       - name: Terraform Apply (Provision ECR)
         working-directory: ${{ inputs.service_path }}/terraform
-        run: terraform apply -target=aws_ecr_repository.repo -auto-approve
+        run: terraform apply -target=aws_ecr_repository.${{ inputs.ecr_resource_name }} -auto-approve
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -50,7 +58,7 @@ jobs:
       - name: Build and Push Docker Image
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: ${{ inputs.service_name }}
+          REPOSITORY: ${{ inputs.ecr_repo_name }}
           IMAGE_TAG: latest
         run: |
           cd ${{ inputs.service_path }}

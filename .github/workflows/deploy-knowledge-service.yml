@@ -17,4 +17,6 @@ jobs:
     with:
       service_name: 'knowledge-service'
       service_path: 'services/knowledge-service'
+      ecr_repo_name: 'knowledge-service'
+      ecr_resource_name: 'app_repo'
     secrets: inherit

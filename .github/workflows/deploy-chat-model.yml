@@ -17,4 +17,6 @@ jobs:
     with:
       service_name: 'chat-model'
       service_path: 'services/chat_model'
+      ecr_repo_name: 'centinela-chat-model'
+      ecr_resource_name: 'repo'
     secrets: inherit
