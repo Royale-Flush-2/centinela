@@ -51,7 +51,7 @@ resource "aws_apprunner_service" "app_service" {
     auto_deployments_enabled = true
     authentication_configuration { access_role_arn = aws_iam_role.apprunner_access_role.arn }
     image_repository {
-      image_identifier      = "${aws_ecr_repository.app_repo.repository_url}:latest"
+      image_identifier      = "${aws_ecr_repository.app_repo.repository_url}:${var.image_tag}"
       image_repository_type = "ECR"
       image_configuration {
         port = "8000"

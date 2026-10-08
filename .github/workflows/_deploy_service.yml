@@ -37,19 +37,12 @@ jobs:
           aws-region: us-east-2
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform Init
-        working-directory: ${{ inputs.service_path }}/terraform
+      - name: Ensure ECR Repository Exists
         run: |
-          terraform init \
-            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
-            -backend-config="key=${{ inputs.service_name }}/terraform.tfstate" \
-            -backend-config="region=us-east-2"
-
-      - name: Terraform Apply (Provision ECR)
-        working-directory: ${{ inputs.service_path }}/terraform
-        run: terraform apply -target=aws_ecr_repository.${{ inputs.ecr_resource_name }} -auto-approve
+          aws ecr describe-repositories --repository-names ${{ inputs.ecr_repo_name }} >/dev/null 2>&1 || \
+          aws ecr create-repository --repository-name ${{ inputs.ecr_repo_name }}
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -59,31 +52,24 @@ jobs:
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: ${{ inputs.ecr_repo_name }}
-          IMAGE_TAG: latest
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           cd ${{ inputs.service_path }}
           docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-      - name: Wait for AppRunner Ready
+      - name: Terraform Init
+        working-directory: ${{ inputs.service_path }}/terraform
         run: |
-          SERVICE_ARN=$(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='${{ inputs.ecr_repo_name }}'].ServiceArn" --output text || echo "None")
-          if [ "$SERVICE_ARN" != "None" ] && [ -n "$SERVICE_ARN" ]; then
-            echo "Waiting for AppRunner service $SERVICE_ARN to be ready..."
-            while true; do
-              STATUS=$(aws apprunner describe-service --service-arn $SERVICE_ARN --query "Service.Status" --output text)
-              if [ "$STATUS" == "RUNNING" ] || [ "$STATUS" == "CREATE_FAILED" ] || [ "$STATUS" == "UPDATE_FAILED" ] || [ -z "$STATUS" ]; then
-                echo "Service is $STATUS"
-                break
-              fi
-              echo "Service is $STATUS, waiting 15 seconds..."
-              sleep 15
-            done
-          fi
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=${{ inputs.service_name }}/terraform.tfstate" \
+            -backend-config="region=us-east-2"
 
       - name: Terraform Apply (AppRunner and other resources)
         working-directory: ${{ inputs.service_path }}/terraform
         env:
+          TF_VAR_image_tag: ${{ github.sha }}
           TF_VAR_deepseek_api_key: ${{ secrets.CENTINELA_DEEPSEEK_API_KEY }}
           TF_VAR_database_url: ${{ secrets.CENTINELA_DATABASE_URL }}
           TF_VAR_knowledge_service_url: ${{ secrets.KNOWLEDGE_SERVICE_URL }}
@@ -94,4 +80,10 @@ jobs:
           TF_VAR_mcp_server_url: ${{ secrets.MCP_SERVER_URL }}
           TF_VAR_strategist_url: ${{ secrets.STRATEGIST_URL }}
           TF_VAR_embedding_model: ${{ secrets.EMBEDDING_MODEL }}
-        run: terraform apply -auto-approve
+        run: |
+          # Import ECR if it exists in AWS but not in state to prevent RepositoryAlreadyExistsException
+          if ! terraform state list | grep -q "aws_ecr_repository.${{ inputs.ecr_resource_name }}"; then
+            terraform import aws_ecr_repository.${{ inputs.ecr_resource_name }} ${{ inputs.ecr_repo_name }}
+          fi
+          terraform apply -auto-approve
+
