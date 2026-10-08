@@ -16,7 +16,7 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write # Required for AWS OIDC
+      id-token: write
       contents: read
     steps:
       - name: Checkout Code
@@ -25,9 +25,32 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          # You will need to create this OIDC role in AWS
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-deploy-role
           aws-region: us-east-2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        working-directory: ./infra/environments/prod
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=prod/terraform.tfstate" \
+            -backend-config="region=us-east-2"
+
+      - name: Terraform Apply (Provision ECR and AppRunner)
+        working-directory: ./infra/environments/prod
+        env:
+          TF_VAR_knowledge_service_url: ${{ secrets.KNOWLEDGE_SERVICE_URL }}
+          TF_VAR_orchestrator_url: ${{ secrets.ORCHESTRATOR_URL }}
+          TF_VAR_vigia_url: ${{ secrets.VIGIA_URL }}
+          TF_VAR_analyzer_url: ${{ secrets.ANALYZER_URL }}
+          TF_VAR_clustering_url: ${{ secrets.CLUSTERING_URL }}
+          TF_VAR_mcp_server_url: ${{ secrets.MCP_SERVER_URL }}
+          TF_VAR_strategist_url: ${{ secrets.STRATEGIST_URL }}
+          TF_VAR_embedding_model: ${{ secrets.EMBEDDING_MODEL }}
+        run: terraform apply -auto-approve
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -40,13 +63,9 @@ jobs:
           IMAGE_TAG: latest
         run: |
           cd ${{ inputs.service_path }}
-          # Build the Docker image
           docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
-          # Push to ECR
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-      # Since AppRunner is tied to ECR, pushing the 'latest' tag will trigger a new deployment automatically
-      # if AppRunner is configured with ContinuousIntegration = true. If not, we trigger it manually:
       - name: Trigger AppRunner Deployment
         run: |
           SERVICE_ARN=$(aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='${{ inputs.service_name }}'].ServiceArn" --output text)
