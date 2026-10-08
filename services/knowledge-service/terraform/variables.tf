@@ -1,4 +1,4 @@
-variable "aws_region" { default = "us-east-1" }
+variable "aws_region" { default = "us-east-2" }
 variable "app_name" { default = "knowledge-service" }
 variable "database_url" { default = "" }
 variable "embedding_model" { default = "all-MiniLM-L6-v2" }

@@ -1,4 +1,4 @@
-variable "aws_region" { default = "us-east-1" }
+variable "aws_region" { default = "us-east-2" }
 variable "app_name" { default = "postgres-mcp" }
 variable "database_url" { default = "" }
 variable "statement_timeout" { default = "5000" }
