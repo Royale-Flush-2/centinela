@@ -68,5 +68,5 @@ PORT = "8000"
     cpu               = "1024"
     memory            = "2048"
   }
-  depends_on = ["aws_iam_role_policy_attachment.apprunner_ecr"]
+  depends_on = [aws_iam_role_policy_attachment.apprunner_ecr]
 }
